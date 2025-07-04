@@ -1,26 +1,50 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --bg: rgb(10 10 10);
+  --bg-secondary: rgb(26 26 26);
+  --bg-tertiary: rgb(42 42 42);
+  --bg-hover: rgb(51 51 51);
+  --border: rgb(64 64 64);
+  --border-hover: rgb(85 85 85);
+  --text: rgb(255 255 255);
+  --text-secondary: rgb(176 176 176);
+  --text-muted: rgb(136 136 136);
+  --primary: rgb(59 130 246);
+  --primary-hover: rgb(37 99 235);
+  --success: rgb(16 185 129);
+  --success-hover: rgb(5 150 105);
+  --warning: rgb(245 158 11);
+  --warning-hover: rgb(217 119 6);
+  --danger: rgb(239 68 68);
+  --danger-hover: rgb(220 38 38);
+  --accent: rgb(139 92 246);
+  --accent-hover: rgb(124 58 237);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* [data-theme="dark"] {
+  
+} */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body,
+html {
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  height: 100vh;
+}
+
+#root {
+  height: 100%;
+}
+
+/* textarea::-webkit-scrollbar {
+  width: 0;
+} */
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
 }
