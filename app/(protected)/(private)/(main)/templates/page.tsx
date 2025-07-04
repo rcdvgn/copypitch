@@ -14,30 +14,7 @@ import {
   Variable,
 } from "lucide-react";
 
-// Color variables
-const colors = {
-  // Dark theme colors
-  bg: "#0a0a0a",
-  bgSecondary: "#1a1a1a",
-  bgTertiary: "#2a2a2a",
-  bgHover: "#333333",
-  border: "#404040",
-  borderHover: "#555555",
-  text: "#ffffff",
-  textSecondary: "#b0b0b0",
-  textMuted: "#888888",
-  primary: "#3b82f6",
-  primaryHover: "#2563eb",
-  success: "#10b981",
-  successHover: "#059669",
-  warning: "#f59e0b",
-  warningHover: "#d97706",
-  danger: "#ef4444",
-  dangerHover: "#dc2626",
-  accent: "#8b5cf6",
-  accentHover: "#7c3aed",
-};
-
+// Interfaces mantidas
 interface Template {
   id: string;
   title: string;
@@ -56,7 +33,7 @@ interface Variation {
   notes?: string;
 }
 
-const CopyPitch: React.FC = () => {
+const Templates: React.FC = () => {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
     null
@@ -286,88 +263,32 @@ const CopyPitch: React.FC = () => {
   const hasVariables = currentVariables.length > 0;
 
   return (
-    <div
-      style={{
-        backgroundColor: colors.bg,
-        color: colors.text,
-        minHeight: "100vh",
-        fontFamily: "system-ui, -apple-system, sans-serif",
-      }}
-    >
-      <div style={{ display: "flex", height: "100vh" }}>
+    <div className="text-text min-h-screen font-sans">
+      <div className="flex h-screen">
         {/* Sidebar */}
-        <div
-          style={{
-            width: "320px",
-            backgroundColor: colors.bgSecondary,
-            borderRight: `1px solid ${colors.border}`,
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
+        <div className="w-[320px] bg-bg-secondary border-r border-border flex flex-col">
           {/* Header */}
-          <div
-            style={{
-              padding: "24px 20px",
-              borderBottom: `1px solid ${colors.border}`,
-            }}
-          >
-            <h1
-              style={{
-                margin: 0,
-                fontSize: "24px",
-                fontWeight: "700",
-                color: colors.primary,
-                marginBottom: "16px",
-              }}
-            >
-              CopyPitch
-            </h1>
-
+          <div className="p-6 border-b border-border">
+            <h1 className="text-2xl font-bold text-primary mb-4">CopyPitch</h1>
             {/* Search */}
-            <div style={{ position: "relative", marginBottom: "16px" }}>
+            <div className="relative mb-4">
               <Search
                 size={16}
-                style={{
-                  position: "absolute",
-                  left: "12px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: colors.textMuted,
-                }}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
               />
               <input
                 type="text"
                 placeholder="Search templates..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px 8px 36px",
-                  backgroundColor: colors.bgTertiary,
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: "6px",
-                  color: colors.text,
-                  fontSize: "14px",
-                  boxSizing: "border-box",
-                }}
+                className="w-full pl-9 pr-3 py-2 bg-bg-tertiary border border-border rounded-md text-text text-sm box-border"
               />
             </div>
-
             {/* Category Filter */}
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                backgroundColor: colors.bgTertiary,
-                border: `1px solid ${colors.border}`,
-                borderRadius: "6px",
-                color: colors.text,
-                fontSize: "14px",
-                marginBottom: "16px",
-              }}
+              className="w-full px-3 py-2 bg-bg-tertiary border border-border rounded-md text-text text-sm mb-4"
             >
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
@@ -377,33 +298,17 @@ const CopyPitch: React.FC = () => {
                 </option>
               ))}
             </select>
-
             {/* New Template Button */}
             <button
               onClick={addNewTemplate}
-              style={{
-                width: "100%",
-                padding: "10px 16px",
-                backgroundColor: colors.primary,
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "14px",
-                fontWeight: "500",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-              }}
+              className="w-full py-2.5 px-4 bg-primary text-white rounded-md font-medium flex items-center justify-center gap-2 text-sm"
             >
               <Plus size={16} />
               New Template
             </button>
           </div>
-
           {/* Templates List */}
-          <div style={{ flex: 1, overflow: "auto" }}>
+          <div className="flex-1 overflow-auto">
             {filteredTemplates.map((template) => (
               <div
                 key={template.id}
@@ -412,36 +317,14 @@ const CopyPitch: React.FC = () => {
                   setSelectedVariation(template.variations[0]);
                   setIsEditing(false);
                 }}
-                style={{
-                  padding: "16px 20px",
-                  borderBottom: `1px solid ${colors.border}`,
-                  cursor: "pointer",
-                  backgroundColor:
-                    selectedTemplate?.id === template.id
-                      ? colors.bgTertiary
-                      : "transparent",
-                  borderLeft:
-                    selectedTemplate?.id === template.id
-                      ? `3px solid ${colors.primary}`
-                      : "3px solid transparent",
-                }}
+                className={`px-5 py-4 border-b border-border cursor-pointer ${
+                  selectedTemplate?.id === template.id
+                    ? "bg-bg-tertiary border-l-4 border-primary"
+                    : "border-l-4 border-transparent"
+                }`}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    marginBottom: "8px",
-                  }}
-                >
-                  <h3
-                    style={{
-                      margin: 0,
-                      fontSize: "16px",
-                      fontWeight: "500",
-                      color: colors.text,
-                    }}
-                  >
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="m-0 text-base font-medium text-text">
                     {template.title}
                   </h3>
                   <button
@@ -449,49 +332,19 @@ const CopyPitch: React.FC = () => {
                       e.stopPropagation();
                       deleteTemplate(template.id);
                     }}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: colors.textMuted,
-                      cursor: "pointer",
-                      padding: "4px",
-                    }}
+                    className="bg-none border-none text-text-muted cursor-pointer p-1"
                   >
                     <Trash2 size={14} />
                   </button>
                 </div>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "14px",
-                    color: colors.textSecondary,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                  }}
-                >
+                <p className="m-0 text-sm text-text-secondary overflow-hidden text-ellipsis line-clamp-2">
                   {template.content}
                 </p>
-                <div
-                  style={{
-                    marginTop: "8px",
-                    display: "flex",
-                    gap: "6px",
-                    flexWrap: "wrap",
-                  }}
-                >
+                <div className="mt-2 flex gap-1.5 flex-wrap">
                   {template.tags.slice(0, 3).map((tag) => (
                     <span
                       key={tag}
-                      style={{
-                        fontSize: "12px",
-                        backgroundColor: colors.bgTertiary,
-                        color: colors.textMuted,
-                        padding: "2px 8px",
-                        borderRadius: "12px",
-                      }}
+                      className="text-xs bg-bg-tertiary text-text-muted px-2 py-0.5 rounded-full"
                     >
                       {tag}
                     </span>
@@ -501,74 +354,27 @@ const CopyPitch: React.FC = () => {
             ))}
           </div>
         </div>
-
         {/* Main Content */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <div className="flex-1 flex flex-col">
           {selectedTemplate ? (
             <>
               {/* Header */}
-              <div
-                style={{
-                  padding: "24px 32px",
-                  borderBottom: `1px solid ${colors.border}`,
-                  backgroundColor: colors.bgSecondary,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
+              <div className="px-8 py-6 border-b border-border bg-bg-secondary">
+                <div className="flex justify-between items-center">
                   <div>
-                    <h2
-                      style={{
-                        margin: 0,
-                        fontSize: "20px",
-                        fontWeight: "600",
-                        marginBottom: "8px",
-                      }}
-                    >
+                    <h2 className="m-0 text-xl font-semibold mb-2">
                       {selectedTemplate.title}
                     </h2>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "8px",
-                        alignItems: "center",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "14px",
-                          color: colors.textSecondary,
-                          backgroundColor: colors.bgTertiary,
-                          padding: "4px 8px",
-                          borderRadius: "4px",
-                        }}
-                      >
+                    <div className="flex gap-2 items-center">
+                      <span className="text-sm text-text-secondary bg-bg-tertiary px-2 py-1 rounded">
                         {selectedTemplate.category}
                       </span>
-                      <span
-                        style={{ fontSize: "14px", color: colors.textMuted }}
-                      >
+                      <span className="text-sm text-text-muted">
                         {selectedTemplate.variations.length} variation
                         {selectedTemplate.variations.length !== 1 ? "s" : ""}
                       </span>
                       {hasVariables && (
-                        <span
-                          style={{
-                            fontSize: "14px",
-                            color: colors.accent,
-                            backgroundColor: colors.bgTertiary,
-                            padding: "4px 8px",
-                            borderRadius: "4px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
-                        >
+                        <span className="text-sm text-accent bg-bg-tertiary px-2 py-1 rounded flex items-center gap-1">
                           <Variable size={12} />
                           {currentVariables.length} variable
                           {currentVariables.length !== 1 ? "s" : ""}
@@ -576,68 +382,35 @@ const CopyPitch: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: "8px" }}>
+                  <div className="flex gap-2">
                     <button
                       onClick={() => setShowVariableEditor(!showVariableEditor)}
                       disabled={!hasVariables}
-                      style={{
-                        padding: "8px 16px",
-                        backgroundColor: hasVariables
+                      className={`px-4 py-2 rounded-md text-sm flex items-center gap-1 ${
+                        hasVariables
                           ? showVariableEditor
-                            ? colors.accent
-                            : colors.bgTertiary
-                          : colors.border,
-                        color: hasVariables
-                          ? showVariableEditor
-                            ? "white"
-                            : colors.text
-                          : colors.textMuted,
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: hasVariables ? "pointer" : "not-allowed",
-                        fontSize: "14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}
+                            ? "bg-accent text-white"
+                            : "bg-bg-tertiary text-text"
+                          : "bg-border text-text-muted cursor-not-allowed"
+                      }`}
                     >
                       <Variable size={14} />
                       Variables
                     </button>
                     <button
                       onClick={() => setIsEditing(!isEditing)}
-                      style={{
-                        padding: "8px 16px",
-                        backgroundColor: isEditing
-                          ? colors.success
-                          : colors.bgTertiary,
-                        color: isEditing ? "white" : colors.text,
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}
+                      className={`px-4 py-2 rounded-md text-sm flex items-center gap-1 ${
+                        isEditing
+                          ? "bg-success text-white"
+                          : "bg-bg-tertiary text-text"
+                      }`}
                     >
                       <Edit2 size={14} />
                       {isEditing ? "Save" : "Edit"}
                     </button>
                     <button
                       onClick={addVariation}
-                      style={{
-                        padding: "8px 16px",
-                        backgroundColor: colors.primary,
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}
+                      className="px-4 py-2 rounded-md text-sm flex items-center gap-1 bg-primary text-white"
                     >
                       <Plus size={14} />
                       Add Variation
@@ -645,72 +418,25 @@ const CopyPitch: React.FC = () => {
                   </div>
                 </div>
               </div>
-
               {/* Variables Editor */}
               {showVariableEditor && hasVariables && (
-                <div
-                  style={{
-                    padding: "24px 32px",
-                    backgroundColor: colors.bgSecondary,
-                    borderBottom: `1px solid ${colors.border}`,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    <h3
-                      style={{
-                        margin: 0,
-                        fontSize: "16px",
-                        fontWeight: "500",
-                        color: colors.accent,
-                      }}
-                    >
+                <div className="px-8 py-6 bg-bg-secondary border-b border-border">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="m-0 text-base font-medium text-accent">
                       Template Variables
                     </h3>
                     <button
                       onClick={clearAllVariables}
-                      style={{
-                        padding: "6px 12px",
-                        backgroundColor: colors.warning,
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        fontSize: "12px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                      }}
+                      className="px-3 py-1.5 rounded bg-warning text-white text-xs flex items-center gap-1"
                     >
                       <RotateCcw size={12} />
                       Clear All
                     </button>
                   </div>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns:
-                        "repeat(auto-fit, minmax(250px, 1fr))",
-                      gap: "16px",
-                    }}
-                  >
+                  <div className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
                     {currentVariables.map((varName) => (
                       <div key={varName}>
-                        <label
-                          style={{
-                            display: "block",
-                            fontSize: "14px",
-                            fontWeight: "500",
-                            color: colors.text,
-                            marginBottom: "4px",
-                          }}
-                        >
+                        <label className="block text-sm font-medium text-text mb-1">
                           {varName}
                         </label>
                         <input
@@ -723,82 +449,37 @@ const CopyPitch: React.FC = () => {
                             })
                           }
                           placeholder={`Enter ${varName}`}
-                          style={{
-                            width: "100%",
-                            padding: "8px 12px",
-                            backgroundColor: colors.bgTertiary,
-                            border: `1px solid ${colors.border}`,
-                            borderRadius: "4px",
-                            color: colors.text,
-                            fontSize: "14px",
-                            boxSizing: "border-box",
-                          }}
+                          className="w-full px-3 py-2 bg-bg-tertiary border border-border rounded text-text text-sm box-border"
                         />
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-
               {/* Variations Tabs */}
-              <div
-                style={{
-                  padding: "0 32px",
-                  backgroundColor: colors.bgSecondary,
-                  borderBottom: `1px solid ${colors.border}`,
-                }}
-              >
-                <div style={{ display: "flex", gap: "4px" }}>
+              <div className="px-8 bg-bg-secondary border-b border-border">
+                <div className="flex gap-1">
                   {selectedTemplate.variations.map((variation) => (
                     <button
                       key={variation.id}
                       onClick={() => setSelectedVariation(variation)}
-                      style={{
-                        padding: "12px 16px",
-                        backgroundColor:
-                          selectedVariation?.id === variation.id
-                            ? colors.bg
-                            : "transparent",
-                        color:
-                          selectedVariation?.id === variation.id
-                            ? colors.text
-                            : colors.textSecondary,
-                        border: "none",
-                        borderRadius: "6px 6px 0 0",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        borderBottom:
-                          selectedVariation?.id === variation.id
-                            ? `2px solid ${colors.primary}`
-                            : "2px solid transparent",
-                      }}
+                      className={`px-4 py-3 rounded-t-md text-sm font-medium border-b-2 ${
+                        selectedVariation?.id === variation.id
+                          ? "bg-bg text-text border-primary"
+                          : "bg-transparent text-text-secondary border-transparent"
+                      }`}
                     >
                       {variation.name}
                     </button>
                   ))}
                 </div>
               </div>
-
               {/* Content */}
-              <div style={{ flex: 1, padding: "32px", overflow: "auto" }}>
+              <div className="flex-1 px-8 py-8 overflow-auto">
                 {selectedVariation && (
                   <div>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginBottom: "16px",
-                      }}
-                    >
-                      <h3
-                        style={{
-                          margin: 0,
-                          fontSize: "18px",
-                          fontWeight: "500",
-                        }}
-                      >
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="m-0 text-lg font-medium">
                         {selectedVariation.name}
                       </h3>
                       <button
@@ -808,36 +489,18 @@ const CopyPitch: React.FC = () => {
                             selectedVariation.id
                           )
                         }
-                        style={{
-                          padding: "8px 16px",
-                          backgroundColor:
-                            copiedId === selectedVariation.id
-                              ? colors.success
-                              : colors.primary,
-                          color: "white",
-                          border: "none",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          fontSize: "14px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                        }}
+                        className={`px-4 py-2 rounded-md text-sm flex items-center gap-1 ${
+                          copiedId === selectedVariation.id
+                            ? "bg-success text-white"
+                            : "bg-primary text-white"
+                        }`}
                       >
                         <Copy size={14} />
                         {copiedId === selectedVariation.id ? "Copied!" : "Copy"}
                       </button>
                     </div>
-
                     <div>
-                      <h4
-                        style={{
-                          margin: "0 0 8px 0",
-                          fontSize: "14px",
-                          fontWeight: "500",
-                          color: colors.textSecondary,
-                        }}
-                      >
+                      <h4 className="mb-2 text-sm font-medium text-text-secondary">
                         {isEditing ? "Template Editor" : "Preview"}
                       </h4>
                       <textarea
@@ -876,21 +539,9 @@ const CopyPitch: React.FC = () => {
                           }
                         }}
                         readOnly={!isEditing}
-                        style={{
-                          width: "100%",
-                          height: "300px",
-                          padding: "16px",
-                          backgroundColor: isEditing
-                            ? colors.bgSecondary
-                            : colors.bgTertiary,
-                          border: `1px solid ${colors.border}`,
-                          borderRadius: "8px",
-                          color: colors.text,
-                          fontSize: "16px",
-                          lineHeight: "1.5",
-                          resize: "vertical",
-                          fontFamily: "system-ui, -apple-system, sans-serif",
-                        }}
+                        className={`w-full h-[300px] p-4 border border-border rounded-lg text-base leading-relaxed resize-vertical font-sans ${
+                          isEditing ? "bg-bg-secondary" : "bg-bg-tertiary"
+                        } text-text`}
                       />
                     </div>
                   </div>
@@ -898,28 +549,12 @@ const CopyPitch: React.FC = () => {
               </div>
             </>
           ) : (
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                color: colors.textMuted,
-              }}
-            >
-              <FileText size={48} style={{ marginBottom: "16px" }} />
-              <h3
-                style={{
-                  margin: 0,
-                  fontSize: "20px",
-                  fontWeight: "500",
-                  marginBottom: "8px",
-                }}
-              >
+            <div className="flex-1 flex flex-col items-center justify-center text-text-muted">
+              <FileText size={48} className="mb-4" />
+              <h3 className="m-0 text-xl font-medium mb-2">
                 Select a template to get started
               </h3>
-              <p style={{ margin: 0, fontSize: "16px", textAlign: "center" }}>
+              <p className="m-0 text-lg text-center">
                 Choose a template from the sidebar or create a new one
               </p>
             </div>
@@ -930,4 +565,4 @@ const CopyPitch: React.FC = () => {
   );
 };
 
-export default CopyPitch;
+export default Templates;

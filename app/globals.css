@@ -1,25 +1,25 @@
 @import "tailwindcss";
 
 @theme {
-  --bg: rgb(10 10 10);
-  --bg-secondary: rgb(26 26 26);
-  --bg-tertiary: rgb(42 42 42);
-  --bg-hover: rgb(51 51 51);
-  --border: rgb(64 64 64);
-  --border-hover: rgb(85 85 85);
-  --text: rgb(255 255 255);
-  --text-secondary: rgb(176 176 176);
-  --text-muted: rgb(136 136 136);
-  --primary: rgb(59 130 246);
-  --primary-hover: rgb(37 99 235);
-  --success: rgb(16 185 129);
-  --success-hover: rgb(5 150 105);
-  --warning: rgb(245 158 11);
-  --warning-hover: rgb(217 119 6);
-  --danger: rgb(239 68 68);
-  --danger-hover: rgb(220 38 38);
-  --accent: rgb(139 92 246);
-  --accent-hover: rgb(124 58 237);
+  --color-bg: rgb(10 10 10);
+  --color-bg-secondary: rgb(26 26 26);
+  --color-bg-tertiary: rgb(42 42 42);
+  --color-bg-hover: rgb(51 51 51);
+  --color-border: rgb(64 64 64);
+  --color-border-hover: rgb(85 85 85);
+  --color-text: rgb(255 255 255);
+  --color-text-secondary: rgb(176 176 176);
+  --color-text-muted: rgb(136 136 136);
+  --color-primary: rgb(59 130 246);
+  --color-primary-hover: rgb(37 99 235);
+  --color-success: rgb(16 185 129);
+  --color-success-hover: rgb(5 150 105);
+  --color-warning: rgb(245 158 11);
+  --color-warning-hover: rgb(217 119 6);
+  --color-danger: rgb(239 68 68);
+  --color-danger-hover: rgb(220 38 38);
+  --color-accent: rgb(139 92 246);
+  --color-accent-hover: rgb(124 58 237);
 }
 
 /* [data-theme="dark"] {
@@ -36,8 +36,9 @@ body {
   height: 100vh;
 }
 
-#root {
+#main {
   height: 100%;
+  /* width: 100%; */
 }
 
 /* textarea::-webkit-scrollbar {
