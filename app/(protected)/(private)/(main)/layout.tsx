@@ -12,7 +12,7 @@ const PrivateLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     if (user) {
-      if (user?.onboarded) {
+      if (!user?.onboarded) {
         router.push("/onboarding");
       } else {
         setLetUserIn(true);
