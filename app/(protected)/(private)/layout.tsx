@@ -22,15 +22,7 @@ const PrivateLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
     }
   }, [user]);
 
-  return (
-    <>
-      {letUserIn ? (
-        <div id="main" className="">
-          {children}
-        </div>
-      ) : null}
-    </>
-  );
+  return <>{letUserIn ? <>{children}</> : null}</>;
 };
 
 export default PrivateLayout;
