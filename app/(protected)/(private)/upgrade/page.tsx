@@ -2,24 +2,29 @@
 
 import React, { useState } from "react";
 import { Check, Star, Zap, Shield, Users, Infinity } from "lucide-react";
+import { useSubscription } from "@/app/_hooks/useStripe";
+import { STRIPE_PRICES } from "@/app/_lib/stripe/stripe";
 
-interface UpgradePageProps {
-  onClose?: () => void;
-  onSelectPlan?: (plan: "free" | "standard") => void;
-}
+const UpgradePage = () => {
+  const { subscription, loading, createCheckoutSession } = useSubscription();
 
-const UpgradePage: React.FC<UpgradePageProps> = ({ onClose, onSelectPlan }) => {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
     "monthly"
   );
 
-  const handleSelectPlan = (plan: "free" | "standard") => {
-    onSelectPlan?.(plan);
-  };
-
   const standardPrice = billingPeriod === "monthly" ? 9 : 7;
   const standardTotal = billingPeriod === "monthly" ? 9 : 84;
   const savingsPercentage = Math.round(((9 * 12 - 84) / (9 * 12)) * 100);
+
+  const handleSubscribeStandard = () => {
+    createCheckoutSession(
+      billingPeriod === "monthly"
+        ? STRIPE_PRICES.STANDARD_MONTHLY
+        : STRIPE_PRICES.STANDARD_YEARLY
+    );
+  };
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen bg-bg-primary text-text font-sans">
@@ -30,14 +35,14 @@ const UpgradePage: React.FC<UpgradePageProps> = ({ onClose, onSelectPlan }) => {
             <h1 className="text-2xl font-bold text-text m-0">
               Choose Your Plan
             </h1>
-            {onClose && (
+            {/* {onClose && (
               <button
                 onClick={onClose}
                 className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text bg-transparent border border-border rounded-lg hover:bg-bg-tertiary transition-colors"
               >
                 Maybe Later
               </button>
-            )}
+            )} */}
           </div>
         </div>
       </div>
@@ -95,7 +100,7 @@ const UpgradePage: React.FC<UpgradePageProps> = ({ onClose, onSelectPlan }) => {
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-xl font-semibold text-text m-0">Free</h3>
                 <div className="text-sm text-text-secondary bg-bg-tertiary px-2 py-1 rounded">
-                  Current Plan
+                  {subscription?.plan === "free" && "Current Plan"}
                 </div>
               </div>
               <p className="text-text-secondary mb-4">
@@ -127,10 +132,10 @@ const UpgradePage: React.FC<UpgradePageProps> = ({ onClose, onSelectPlan }) => {
             </div>
 
             <button
-              onClick={() => handleSelectPlan("free")}
+              //   onClick={() => handleSelectPlan("free")}
               className="mt-auto w-full py-3 px-4 bg-bg-tertiary border border-border text-text font-medium rounded-lg hover:bg-bg-tertiary/80 transition-colors"
             >
-              Current Plan
+              {subscription?.plan === "free" && "Current Plan"}
             </button>
           </div>
 
@@ -215,10 +220,10 @@ const UpgradePage: React.FC<UpgradePageProps> = ({ onClose, onSelectPlan }) => {
             </div>
 
             <button
-              onClick={() => handleSelectPlan("standard")}
+              onClick={handleSubscribeStandard}
               className="mt-auto w-full py-3 px-4 bg-accent text-white font-medium rounded-lg hover:bg-accent/90 transition-colors"
             >
-              Upgrade to Standard
+              {subscription?.isActive ? "Current Plan" : "Upgrade to Standard"}
             </button>
           </div>
         </div>

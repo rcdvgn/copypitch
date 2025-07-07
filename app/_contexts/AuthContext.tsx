@@ -43,6 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             email: currentUser.email,
             createdAt: serverTimestamp(),
             onboarding: true,
+            plan: "free",
           };
 
           await setDoc(userDocRef, newUser);
