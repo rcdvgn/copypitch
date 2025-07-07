@@ -17,7 +17,9 @@ const Sidebar = ({
       <div className="p-6 border-b border-border">
         <h1 className="text-2xl font-bold text-primary mb-4">CopyPitch</h1>
         <button
-          onClick={() => addModal("createTemplate", "helllllooo")}
+          onClick={() =>
+            addModal("createTemplate", { onCreateTemplate: addNewTemplate })
+          }
           className="w-full py-2.5 px-4 bg-primary text-white rounded-md font-medium flex items-center justify-center gap-2 text-sm"
         >
           <Plus size={16} />

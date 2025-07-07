@@ -1,15 +1,8 @@
+// page.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  Plus,
-  Edit2,
-  Copy,
-  Trash2,
-  FileText,
-  RotateCcw,
-  Variable,
-} from "lucide-react";
+import { FileText } from "lucide-react";
 import {
   createTemplate,
   createVariant,
@@ -27,23 +20,24 @@ import {
 } from "@/app/_utils/templateEditorUtils";
 import VariantsTabs from "@/app/_components/templateEditor/VariantsTabs";
 
-// --- Utility hooks ---
-
-// --- Components ---
-
-// --- Main page ---
-
 const Templates: React.FC = () => {
   const { user } = useAuth();
+
+  // Core state
   const [templates, setTemplates] = useState<any>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [variants, setVariants] = useState<any[]>([]);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
+
+  // UI state
   const [isEditing, setIsEditing] = useState(false);
   const [copiedId, setCopiedId] = useState<any>(null);
-  const [variables, setVariables] = useState<any>({});
   const [showVariableEditor, setShowVariableEditor] = useState(false);
 
+  // Variables state - now includes template variables
+  const [variables, setVariables] = useState<any>({});
+
+  // Load templates on mount
   useEffect(() => {
     const handleFetchTemplates = async () => {
       const fetchedTemplates: any = await fetchUserTemplates(user?.id);
@@ -52,8 +46,10 @@ const Templates: React.FC = () => {
     handleFetchTemplates();
   }, [user?.id]);
 
+  // Load variants when template changes
   useEffect(() => {
     if (!selectedTemplate) return;
+
     const handleFetchTemplateVariants = async () => {
       const fetchedTemplateVariants = await fetchTemplateVariants(
         selectedTemplate?.id
@@ -65,19 +61,59 @@ const Templates: React.FC = () => {
   }, [selectedTemplate]);
 
   // Variable extraction logic
-  const { getCurrentVariables } = useVariables(selectedVariant);
+  const selectedVariantData = variants.find(
+    (v: any) => v.id === selectedVariant
+  );
+  const { getCurrentVariables } = useVariables(selectedVariantData);
 
+  // Update variables when variant changes or template ID changes
   useEffect(() => {
-    if (selectedVariant) {
+    if (selectedVariantData && selectedTemplate) {
       const currentVars = getCurrentVariables();
       const newVariables: Record<string, string> = {};
+
+      // Start with template variables if they exist
+      const templateVars = selectedTemplate.variables || {};
+
+      // Merge with current variables from content
       currentVars.forEach((varName: any) => {
-        newVariables[varName] = variables[varName] || "";
+        newVariables[varName] =
+          variables[varName] || templateVars[varName] || "";
       });
-      setVariables(newVariables);
+
+      // Only update if the variables actually changed
+      const hasChanged =
+        JSON.stringify(newVariables) !== JSON.stringify(variables);
+      if (hasChanged) {
+        setVariables(newVariables);
+      }
     }
-    // eslint-disable-next-line
-  }, [selectedVariant]);
+  }, [selectedVariant, selectedTemplate?.id, selectedVariantData?.content]);
+
+  // Update selected template when variables change (for unified data structure)
+  useEffect(() => {
+    if (selectedTemplate && variables && Object.keys(variables).length > 0) {
+      const updatedTemplate = {
+        ...selectedTemplate,
+        variables: variables,
+      };
+
+      // Only update if the template variables actually changed
+      const hasChanged =
+        JSON.stringify(selectedTemplate.variables) !==
+        JSON.stringify(variables);
+      if (hasChanged) {
+        setSelectedTemplate(updatedTemplate);
+
+        // Update in templates array
+        setTemplates((prev: any) =>
+          prev.map((t: any) =>
+            t.id === selectedTemplate.id ? updatedTemplate : t
+          )
+        );
+      }
+    }
+  }, [variables, selectedTemplate?.id]);
 
   const copyToClipboard = async (text: string, id: string) => {
     try {
@@ -95,6 +131,7 @@ const Templates: React.FC = () => {
       userId: user?.id,
       name,
       category,
+      variables: {}, // Initialize with empty variables
     });
     await createVariant(user?.id, newTemplate.id, "");
     setTemplates([...templates, newTemplate]);
@@ -111,26 +148,17 @@ const Templates: React.FC = () => {
     }
   };
 
-  const addVariant = () => {
+  const addVariant = async () => {
     if (!selectedTemplate) return;
-    const newVariant = {
-      id: Date.now().toString(),
-      name: `Variant ${variants.length + 1}`,
-      content: selectedTemplate.content,
-    };
-    const updatedTemplate = {
-      ...selectedTemplate,
-      variants: [...(selectedTemplate.variants || []), newVariant],
-      updatedAt: new Date(),
-    };
-    setTemplates(
-      templates.map((t: any) =>
-        t.id === selectedTemplate.id ? updatedTemplate : t
-      )
+
+    const newVariant = await createVariant(
+      user?.id,
+      selectedTemplate.id,
+      selectedTemplate.content || ""
     );
-    setSelectedTemplate(updatedTemplate);
+
     setVariants([...variants, newVariant]);
-    setSelectedVariant(newVariant);
+    setSelectedVariant(newVariant.id);
     setIsEditing(true);
   };
 
@@ -144,10 +172,6 @@ const Templates: React.FC = () => {
 
   const currentVariables = getCurrentVariables();
   const hasVariables = currentVariables.length > 0;
-
-  const selectedVariantData = variants.find(
-    (v: any) => v.id === selectedVariant
-  );
 
   return (
     <div className="text-text min-h-screen font-sans">
@@ -185,6 +209,8 @@ const Templates: React.FC = () => {
                   variables={variables}
                   setVariables={setVariables}
                   clearAllVariables={clearAllVariables}
+                  selectedTemplate={selectedTemplate}
+                  isEditing={isEditing}
                 />
               )}
 

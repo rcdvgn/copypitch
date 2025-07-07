@@ -1,8 +1,7 @@
+// VariantContent.tsx
 import { useEffect, useCallback } from "react";
-import { doc, updateDoc } from "firebase/firestore";
 import { Copy } from "lucide-react";
-import _ from "lodash";
-import { db } from "@/app/_config/firebase/client";
+import { useTemplateUpdates } from "@/app/_utils/templateEditorUtils";
 
 const VariantContent = ({
   selectedVariant,
@@ -15,24 +14,7 @@ const VariantContent = ({
   copiedId,
   selectedVariantData,
 }: any) => {
-  // Get the current variant object from variants array
-
-  // Debounced function to update Firestore
-  const debouncedUpdateContent = useCallback(
-    _.debounce(async (variantId: string, content: string) => {
-      try {
-        const variantRef = doc(db, "variants", variantId);
-        await updateDoc(variantRef, {
-          content: content,
-          updatedAt: new Date(),
-        });
-        console.log("Content updated successfully");
-      } catch (error) {
-        console.error("Error updating content:", error);
-      }
-    }, 500),
-    []
-  );
+  const { debouncedUpdateVariant } = useTemplateUpdates();
 
   // Update Firestore when variant content changes
   useEffect(() => {
@@ -41,17 +23,17 @@ const VariantContent = ({
       selectedVariantData?.content !== undefined &&
       isEditing
     ) {
-      debouncedUpdateContent(selectedVariant, selectedVariantData.content);
+      debouncedUpdateVariant(selectedVariant, selectedVariantData.content);
     }
 
     return () => {
-      debouncedUpdateContent.cancel();
+      debouncedUpdateVariant.cancel();
     };
   }, [
     selectedVariantData?.content,
     selectedVariant,
     isEditing,
-    debouncedUpdateContent,
+    debouncedUpdateVariant,
   ]);
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -72,9 +54,9 @@ const VariantContent = ({
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      debouncedUpdateContent.cancel();
+      debouncedUpdateVariant.cancel();
     };
-  }, [debouncedUpdateContent]);
+  }, [debouncedUpdateVariant]);
 
   return (
     <div className="flex-1 px-8 py-8 overflow-auto">

@@ -10,7 +10,7 @@ const PublicLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     if (user) {
-      router.push("/templates");
+      router.push("/t");
     }
   }, [user, router]);
 

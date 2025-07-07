@@ -1,4 +1,8 @@
+// templateEditorUtils.tsx
 import { useCallback } from "react";
+import { doc, updateDoc } from "firebase/firestore";
+import _ from "lodash";
+import { db } from "@/app/_config/firebase/client";
 
 export function useVariables(selectedVariant: any) {
   const extractVariables = useCallback((content: string) => {
@@ -31,4 +35,44 @@ export function replaceVariables(
     result = result.replace(regex, value);
   });
   return result;
+}
+
+// New unified debounced update hook
+export function useTemplateUpdates() {
+  const debouncedUpdateVariant = useCallback(
+    _.debounce(async (variantId: string, content: string) => {
+      try {
+        const variantRef = doc(db, "variants", variantId);
+        await updateDoc(variantRef, {
+          content: content,
+          updatedAt: new Date(),
+        });
+        console.log("Variant content updated successfully");
+      } catch (error) {
+        console.error("Error updating variant content:", error);
+      }
+    }, 500),
+    []
+  );
+
+  const debouncedUpdateTemplate = useCallback(
+    _.debounce(
+      async (templateId: string, variables: Record<string, string>) => {
+        try {
+          const templateRef = doc(db, "templates", templateId);
+          await updateDoc(templateRef, {
+            variables: variables,
+            updatedAt: new Date(),
+          });
+          console.log("Template variables updated successfully");
+        } catch (error) {
+          console.error("Error updating template variables:", error);
+        }
+      },
+      500
+    ),
+    []
+  );
+
+  return { debouncedUpdateVariant, debouncedUpdateTemplate };
 }
