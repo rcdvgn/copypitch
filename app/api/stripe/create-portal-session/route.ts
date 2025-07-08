@@ -17,11 +17,10 @@ export async function POST(request: NextRequest) {
 
     // Get or create Stripe customer
     const customerId = await getOrCreateStripeCustomer(userId, email);
-
     // Create portal session
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${request.nextUrl.origin}/dashboard`,
+      return_url: `${request.nextUrl.origin}/t`,
     });
 
     return NextResponse.json({ url: portalSession.url });

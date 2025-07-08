@@ -122,7 +122,6 @@ export async function hasActiveSubscription(userId: string): Promise<boolean> {
     if (!userData?.subscriptionId) {
       return false;
     }
-
     // Always check with Stripe as source of truth
     const subscription = await stripe.subscriptions.retrieve(
       userData.subscriptionId
@@ -147,7 +146,6 @@ export async function getUserSubscription(
     if (!userData?.subscriptionId) {
       return null;
     }
-
     const subscription = await stripe.subscriptions.retrieve(
       userData.subscriptionId
     );

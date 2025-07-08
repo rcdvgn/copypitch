@@ -1,12 +1,25 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, Star, Zap, Shield, Users, Infinity } from "lucide-react";
+import {
+  Check,
+  Star,
+  Zap,
+  Shield,
+  Users,
+  Infinity,
+  AlertTriangle,
+} from "lucide-react";
 import { useSubscription } from "@/app/_hooks/useStripe";
 import { STRIPE_PRICES } from "@/app/_lib/stripe/stripe";
+import { useAuth } from "@/app/_contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 const UpgradePage = () => {
-  const { subscription, loading, createCheckoutSession } = useSubscription();
+  const { user } = useAuth();
+  const router = useRouter();
+  const { subscription, loading, createCheckoutSession, createPortalSession } =
+    useSubscription();
 
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
     "monthly"
@@ -17,12 +30,38 @@ const UpgradePage = () => {
   const savingsPercentage = Math.round(((9 * 12 - 84) / (9 * 12)) * 100);
 
   const handleSubscribeStandard = () => {
+    if (!user) {
+      router.push("/signin");
+      return;
+    }
     createCheckoutSession(
       billingPeriod === "monthly"
         ? STRIPE_PRICES.STANDARD_MONTHLY
         : STRIPE_PRICES.STANDARD_YEARLY
     );
   };
+
+  const handleManageSubscription = () => {
+    createPortalSession();
+  };
+
+  const handleFreeAction = () => {
+    if (!user) {
+      router.push("/signin");
+      return;
+    }
+
+    // If user is currently on paid plan, send to portal for downgrade
+    if (subscription?.isActive) {
+      createPortalSession();
+    }
+    // If user is free or expired, no action needed (they're already on free)
+  };
+
+  // Determine user's current plan status
+  const isCurrentlyFree = user && !subscription?.isActive;
+  const isCurrentlyPaid = subscription?.isActive;
+  const isExpiredSubscriber = subscription && !subscription.isActive;
 
   if (loading) return <div>Loading...</div>;
 
@@ -35,14 +74,6 @@ const UpgradePage = () => {
             <h1 className="text-2xl font-bold text-text m-0">
               Choose Your Plan
             </h1>
-            {/* {onClose && (
-              <button
-                onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text bg-transparent border border-border rounded-lg hover:bg-bg-tertiary transition-colors"
-              >
-                Maybe Later
-              </button>
-            )} */}
           </div>
         </div>
       </div>
@@ -99,9 +130,11 @@ const UpgradePage = () => {
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-xl font-semibold text-text m-0">Free</h3>
-                <div className="text-sm text-text-secondary bg-bg-tertiary px-2 py-1 rounded">
-                  {subscription?.plan === "free" && "Current Plan"}
-                </div>
+                {isCurrentlyFree && (
+                  <div className="text-sm text-text-secondary bg-bg-tertiary px-2 py-1 rounded">
+                    Current Plan
+                  </div>
+                )}
               </div>
               <p className="text-text-secondary mb-4">
                 Perfect for getting started with basic template management
@@ -131,11 +164,38 @@ const UpgradePage = () => {
               </div>
             </div>
 
+            {/* Downgrade Warning for Paid Users */}
+            {isCurrentlyPaid && (
+              <div className="mb-4 p-3 bg-warning/10 border border-warning/20 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="w-4 h-4 text-warning" />
+                  <span className="text-sm font-medium text-warning">
+                    Warning
+                  </span>
+                </div>
+                <p className="text-xs text-text-secondary">
+                  Downgrading will limit you to 5 templates and 3 variants.
+                  You'll lose access to team features and priority support.
+                </p>
+              </div>
+            )}
+
             <button
-              //   onClick={() => handleSelectPlan("free")}
-              className="mt-auto w-full py-3 px-4 bg-bg-tertiary border border-border text-text font-medium rounded-lg hover:bg-bg-tertiary/80 transition-colors"
+              onClick={handleFreeAction}
+              disabled={isCurrentlyFree}
+              className={`mt-auto w-full py-3 px-4 font-medium rounded-lg transition-colors ${
+                isCurrentlyFree
+                  ? "bg-bg-tertiary border border-border text-text-secondary cursor-not-allowed"
+                  : isCurrentlyPaid
+                  ? "bg-bg-tertiary border border-border text-text hover:bg-bg-tertiary/80"
+                  : "bg-bg-tertiary border border-border text-text hover:bg-bg-tertiary/80"
+              }`}
             >
-              {subscription?.plan === "free" && "Current Plan"}
+              {isCurrentlyFree
+                ? "Current Plan"
+                : isCurrentlyPaid
+                ? "Downgrade to Free"
+                : "Get Started"}
             </button>
           </div>
 
@@ -153,9 +213,11 @@ const UpgradePage = () => {
                 <h3 className="text-xl font-semibold text-text m-0">
                   Standard
                 </h3>
-                <div className="text-sm text-accent bg-accent/20 px-2 py-1 rounded font-medium">
-                  Recommended
-                </div>
+                {isCurrentlyPaid && (
+                  <div className="text-sm text-text-secondary bg-bg-tertiary px-2 py-1 rounded">
+                    Current Plan
+                  </div>
+                )}
               </div>
               <p className="text-text-secondary mb-4">
                 Everything you need for professional template management
@@ -220,10 +282,20 @@ const UpgradePage = () => {
             </div>
 
             <button
-              onClick={handleSubscribeStandard}
+              onClick={() => {
+                isCurrentlyPaid
+                  ? handleManageSubscription()
+                  : handleSubscribeStandard();
+              }}
               className="mt-auto w-full py-3 px-4 bg-accent text-white font-medium rounded-lg hover:bg-accent/90 transition-colors"
             >
-              {subscription?.isActive ? "Current Plan" : "Upgrade to Standard"}
+              {!user
+                ? "Get Started"
+                : isCurrentlyPaid
+                ? "Manage Subscription"
+                : isExpiredSubscriber
+                ? "Reactivate"
+                : "Get Started"}
             </button>
           </div>
         </div>
@@ -307,10 +379,7 @@ const UpgradePage = () => {
               .
             </p>
             <p className="mb-0">
-              Standard plan automatically renews{" "}
-              {billingPeriod === "monthly" ? "monthly" : "yearly"}. Cancel
-              anytime from your account settings. All prices are in USD and
-              exclude applicable taxes.
+              All prices are in USD and exclude applicable taxes.
             </p>
           </div>
         </div>

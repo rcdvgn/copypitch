@@ -23,7 +23,6 @@ export async function POST(request: NextRequest) {
 
     // Get or create Stripe customer
     const customerId = await getOrCreateStripeCustomer(userId, email);
-
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -35,8 +34,8 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: `${request.nextUrl.origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${request.nextUrl.origin}/plans`,
+      success_url: `${request.nextUrl.origin}/t`,
+      cancel_url: `${request.nextUrl.origin}/pricing`,
       metadata: {
         userId,
       },
