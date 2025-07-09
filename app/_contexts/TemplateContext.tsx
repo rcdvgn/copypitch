@@ -102,12 +102,22 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { user } = useAuth();
-  const router = useRouter();
   const params = useParams();
   const { debouncedUpdateTemplateVariables } = useTemplateUpdates();
+  const router = useRouter();
 
   // Extract templateId from route parameters
-  const currentTemplateId = params?.templateId as string | null;
+  const currentTemplateId = (() => {
+    if (!params?.templateId) return null;
+
+    // Handle catch-all route where templateId is an array
+    if (Array.isArray(params.templateId)) {
+      return params.templateId[0] || null;
+    }
+
+    // Handle regular dynamic route where templateId is a string
+    return params.templateId as string;
+  })();
 
   // Core state
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -149,7 +159,7 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const loadTemplates = async () => {
       try {
-        const fetchedTemplates = await fetchUserTemplates(user.id);
+        const fetchedTemplates: any = await fetchUserTemplates(user.id);
         setTemplates(fetchedTemplates);
       } catch (error) {
         console.error("Error loading templates:", error);
@@ -169,7 +179,9 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const loadVariants = async () => {
       try {
-        const fetchedVariants = await fetchTemplateVariants(currentTemplateId);
+        const fetchedVariants: any = await fetchTemplateVariants(
+          currentTemplateId
+        );
         setVariants(fetchedVariants);
 
         // Select the first variant (default should be first)
@@ -233,7 +245,7 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
       setTemplates((prev) => [newTemplate, ...prev]);
 
       // Navigate to the new template
-      router.push(`/templates/${newTemplate.id}`);
+      router.push(`/t/${newTemplate.id}`);
       setIsEditing(true);
     } catch (error) {
       console.error("Error creating template:", error);
@@ -246,7 +258,7 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // If we're deleting the current template, navigate away
       if (templateId === currentTemplateId) {
-        router.push("/templates");
+        router.push("/t");
       }
     } catch (error) {
       console.error("Error deleting template:", error);
@@ -254,7 +266,7 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const selectTemplate = (templateId: string) => {
-    router.push(`/templates/${templateId}`);
+    router.push(`/t/${templateId}`);
   };
 
   // Variant actions
@@ -267,7 +279,7 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       // Get the default variant's content
-      const defaultVariant = await getDefaultVariant(currentTemplateId);
+      const defaultVariant: any = await getDefaultVariant(currentTemplateId);
       const defaultContent = defaultVariant?.content || "";
 
       const name = `Variant ${variants.length}`;

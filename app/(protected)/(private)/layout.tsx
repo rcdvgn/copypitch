@@ -1,28 +1,28 @@
+// app/templates/[templateId]/layout.tsx
 "use client";
 
-import React, { ReactNode, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import React from "react";
 import { useAuth } from "@/app/_contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { TemplateProvider } from "@/app/_contexts/TemplateContext";
 
-const PrivateLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
+const TemplateLayout = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   const router = useRouter();
 
-  const [letUserIn, setLetUserIn] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      if (!user?.onboarded) {
-        router.push("/onboarding");
-      } else {
-        setLetUserIn(true);
-      }
-    } else {
+  React.useEffect(() => {
+    if (!user) {
       router.push("/signin");
+    } else if (!user.onboarded) {
+      router.push("/onboarding");
     }
   }, [user]);
 
-  return <>{letUserIn ? <>{children}</> : null}</>;
+  if (!user || !user.onboarded) {
+    return null;
+  }
+
+  return <TemplateProvider>{children}</TemplateProvider>;
 };
 
-export default PrivateLayout;
+export default TemplateLayout;

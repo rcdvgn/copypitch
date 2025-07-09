@@ -1,83 +1,31 @@
-// VariantContent.tsx
-import { useEffect, useCallback } from "react";
-import { Copy } from "lucide-react";
-import { useTemplateUpdates } from "@/app/_utils/templateEditorUtils";
-import VariantsTabs from "./VariantsTabs";
-import TemplateHeader from "./TemplateHeader";
+// _components/templateEditor/VariantContent.tsx
+import React, { useEffect } from "react";
+import { useTemplateContext } from "@/app/_contexts/TemplateContext";
+import { replaceVariables } from "@/app/_utils/templateEditorUtils";
 
-const VariantContent = ({
-  selectedVariant,
-  setSelectedVariant,
-  isEditing,
-  variants,
-  setVariants,
-  variables,
-  replaceVariables,
-  copyToClipboard,
-  copiedId,
-  selectedVariantData,
+const VariantContent = () => {
+  const { currentVariant, isEditing, variables, updateVariantContent } =
+    useTemplateContext();
 
-  selectedTemplate,
-  currentVariables,
-  hasVariables,
-  showVariableEditor,
-  setShowVariableEditor,
-  setIsEditing,
-  addVariant,
-}: any) => {
-  const { debouncedUpdateVariant } = useTemplateUpdates();
-
-  // Update Firestore when variant content changes
-  useEffect(() => {
-    if (
-      selectedVariant &&
-      selectedVariantData?.content !== undefined &&
-      isEditing
-    ) {
-      debouncedUpdateVariant(selectedVariant, selectedVariantData.content);
-    }
-
-    return () => {
-      debouncedUpdateVariant.cancel();
-    };
-  }, [
-    selectedVariantData?.content,
-    selectedVariant,
-    isEditing,
-    debouncedUpdateVariant,
-  ]);
+  // useEffect(() => {
+  // Sync with backend if necessary
+  // }, [currentVariant, isEditing]);
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (isEditing && selectedVariantData) {
-      const newContent = e.target.value;
-
-      // Update the variants array with the new content
-      const updatedVariants = variants.map((variant: any) =>
-        variant.id === selectedVariant
-          ? { ...variant, content: newContent }
-          : variant
-      );
-
-      setVariants(updatedVariants);
+    if (isEditing && currentVariant) {
+      updateVariantContent(e.target.value);
     }
   };
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      debouncedUpdateVariant.cancel();
-    };
-  }, [debouncedUpdateVariant]);
-
   return (
     <div className="bg-bg-tertiary w-full flex-1 max-w-[1000px]">
-      {selectedVariantData && (
+      {currentVariant && (
         <div>
           <textarea
             value={
               isEditing
-                ? selectedVariantData.content || ""
-                : replaceVariables(selectedVariantData.content, variables)
+                ? currentVariant.content || ""
+                : replaceVariables(currentVariant.content, variables)
             }
             onChange={handleContentChange}
             readOnly={!isEditing}

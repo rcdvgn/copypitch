@@ -1,18 +1,22 @@
+// _components/templateEditor/VariantsTabs.tsx
 import { Plus, Star, MoreHorizontal } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useTemplateContext } from "@/app/_contexts/TemplateContext";
+import { useState, useEffect } from "react";
 
-const VariantsTabs = ({
-  variants,
-  selectedVariant,
-  setSelectedVariant,
-  addVariant,
-  handleMakeVariantDefault,
-}: any) => {
+const VariantsTabs = () => {
+  const {
+    variants,
+    currentVariant,
+    selectVariant,
+    addVariant,
+    makeVariantDefault,
+  } = useTemplateContext();
+
   const [showContextMenu, setShowContextMenu] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log(variants, selectedVariant);
-  }, [variants, selectedVariant]);
+    // optionally handle side effects
+  }, [variants, currentVariant]);
 
   const handleContextMenu = (e: React.MouseEvent, variantId: string) => {
     e.preventDefault();
@@ -21,11 +25,10 @@ const VariantsTabs = ({
   };
 
   const handleMakeDefault = (variantId: string) => {
-    handleMakeVariantDefault(variantId);
+    makeVariantDefault(variantId);
     setShowContextMenu(null);
   };
 
-  // Close context menu when clicking outside
   useEffect(() => {
     const handleClickOutside = () => setShowContextMenu(null);
     if (showContextMenu) {
@@ -39,22 +42,23 @@ const VariantsTabs = ({
       <div className="flex w-full">
         {variants &&
           variants.map((variant: any, index: any) => {
-            const nextIsSelected = variants[index + 1]?.id === selectedVariant;
+            const nextIsSelected =
+              variants[index + 1]?.id === currentVariant?.id;
             const isLast = variants.length - 1 === index;
             return (
               <div
                 key={variant?.id}
                 className={`flex grow items-center relative ${
-                  selectedVariant === variant?.id
+                  currentVariant?.id === variant?.id
                     ? "!max-w-[160px]"
                     : "!max-w-[140px]"
                 }`}
               >
                 <button
-                  onClick={() => setSelectedVariant(variant.id)}
+                  onClick={() => selectVariant(variant.id)}
                   onContextMenu={(e) => handleContextMenu(e, variant.id)}
                   className={`text-left grow px-3 h-8 rounded-xl text-sm font-medium cursor-pointer truncate transition-all duration-100 ease-in-out flex items-center gap-1 ${
-                    selectedVariant === variant?.id
+                    currentVariant?.id === variant?.id
                       ? "bg-bg-tertiary text-text"
                       : "text-text-secondary hover:bg-bg-hover"
                   }`}
@@ -67,8 +71,6 @@ const VariantsTabs = ({
                   )}
                   <span className="truncate">{variant?.name}</span>
                 </button>
-
-                {/* Context Menu */}
                 {showContextMenu === variant.id && (
                   <div className="absolute top-full left-0 mt-1 bg-bg-tertiary border border-border rounded-lg shadow-lg z-10 py-1 min-w-[120px]">
                     {!variant.isDefault && (
@@ -91,10 +93,11 @@ const VariantsTabs = ({
                     )}
                   </div>
                 )}
-
                 <span
                   className={`h-5 w-0.5 rounded-full shrink-0 ${
-                    selectedVariant === variant?.id || nextIsSelected || isLast
+                    currentVariant?.id === variant?.id ||
+                    nextIsSelected ||
+                    isLast
                       ? ""
                       : "bg-border"
                   }`}
@@ -102,7 +105,6 @@ const VariantsTabs = ({
               </div>
             );
           })}
-
         <button onClick={addVariant} className="icon-button-sm">
           <Plus size={16} />
         </button>
