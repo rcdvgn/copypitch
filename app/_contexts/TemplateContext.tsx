@@ -102,11 +102,13 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { user } = useAuth();
-  const params = useParams();
-  const { debouncedUpdateTemplateVariables } = useTemplateUpdates();
   const router = useRouter();
+  const params = useParams();
+  const { debouncedUpdateTemplateVariables, debouncedUpdateVariant } =
+    useTemplateUpdates();
 
   // Extract templateId from route parameters
+  // For optional catch-all routes, params.templateId will be an array or undefined
   const currentTemplateId = (() => {
     if (!params?.templateId) return null;
 
@@ -152,6 +154,33 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
     ? extractVariables(currentVariant.content)
     : [];
   const hasVariables = Object.keys(variables).length > 0;
+
+  // RESTORED: Auto-sync variant content to Firestore when editing
+  useEffect(() => {
+    if (
+      currentVariant &&
+      currentVariantId &&
+      currentVariant.content !== undefined &&
+      isEditing
+    ) {
+      debouncedUpdateVariant(currentVariantId, currentVariant.content);
+    }
+    return () => {
+      debouncedUpdateVariant.cancel();
+    };
+  }, [
+    currentVariant?.content,
+    currentVariantId,
+    isEditing,
+    debouncedUpdateVariant,
+  ]);
+
+  // RESTORED: Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      debouncedUpdateVariant.cancel();
+    };
+  }, [debouncedUpdateVariant]);
 
   // Load templates on mount
   useEffect(() => {
@@ -301,6 +330,7 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  // RESTORED: This function now properly updates local state and triggers Firestore sync
   const updateVariantContent = (content: string) => {
     if (!currentVariantId) return;
 
@@ -309,6 +339,7 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
         variant.id === currentVariantId ? { ...variant, content } : variant
       )
     );
+    // Note: Firestore sync happens automatically via the useEffect above
   };
 
   const makeVariantDefaultAction = async (variantId: string) => {
