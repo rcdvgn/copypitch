@@ -87,7 +87,7 @@ export default function CreateTemplate({ data, closeItself }: any) {
             onChange={(e) => setTemplateName(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Enter template name"
-            className="w-full px-3 py-2.5 bg-bg-secondary border border-border rounded-lg text-text text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+            className="input-1"
             autoFocus
           />
         </div>
@@ -105,7 +105,7 @@ export default function CreateTemplate({ data, closeItself }: any) {
                 onChange={(e) => setNewCategoryName(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Enter new category name"
-                className="w-full px-3 py-2.5 bg-bg-secondary border border-border rounded-lg text-text text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+                className="input-1"
               />
               <div className="flex gap-2">
                 <button
@@ -123,7 +123,7 @@ export default function CreateTemplate({ data, closeItself }: any) {
             <select
               value={category}
               onChange={handleCategoryChange}
-              className="w-full px-3 py-2.5 bg-bg-secondary border border-border rounded-lg text-text text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+              className="input-1"
             >
               {categories.map((cat) => (
                 <option

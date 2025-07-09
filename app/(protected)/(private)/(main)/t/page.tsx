@@ -8,6 +8,8 @@ import {
   createVariant,
   fetchTemplateVariants,
   fetchUserTemplates,
+  getDefaultVariant,
+  makeVariantDefault,
 } from "@/app/_lib/db/templates";
 import { useAuth } from "@/app/_contexts/AuthContext";
 import VariantContent from "@/app/_components/templateEditor/VariantContent";
@@ -17,11 +19,13 @@ import Sidebar from "@/app/_components/main/Sidebar";
 import {
   replaceVariables,
   useVariables,
+  useTemplateUpdates,
 } from "@/app/_utils/templateEditorUtils";
 import VariantsTabs from "@/app/_components/templateEditor/VariantsTabs";
 
 const Templates: React.FC = () => {
   const { user } = useAuth();
+  const { debouncedUpdateTemplateVariables } = useTemplateUpdates();
 
   // Core state
   const [templates, setTemplates] = useState<any>([]);
@@ -34,7 +38,7 @@ const Templates: React.FC = () => {
   const [copiedId, setCopiedId] = useState<any>(null);
   const [showVariableEditor, setShowVariableEditor] = useState(false);
 
-  // Variables state - now includes template variables
+  // Variables state - now managed per variant
   const [variables, setVariables] = useState<any>({});
 
   // Load templates on mount
@@ -66,54 +70,101 @@ const Templates: React.FC = () => {
   );
   const { getCurrentVariables } = useVariables(selectedVariantData);
 
-  // Update variables when variant changes or template ID changes
+  // Update variables when variant changes
   useEffect(() => {
     if (selectedVariantData && selectedTemplate) {
-      const currentVars = getCurrentVariables();
-      const newVariables: Record<string, string> = {};
+      const textVariables = getCurrentVariables(); // Variables from text
+      const savedVariables = selectedTemplate.variables || {}; // Variables from template
 
-      // Start with template variables if they exist
-      const templateVars = selectedTemplate.variables || {};
+      // Merge saved variables with text variables
+      const mergedVariables: Record<string, string> = {};
 
-      // Merge with current variables from content
-      currentVars.forEach((varName: any) => {
-        newVariables[varName] =
-          variables[varName] || templateVars[varName] || "";
+      // Add all variables from text (temporary)
+      textVariables.forEach((varName: string) => {
+        mergedVariables[varName] = savedVariables[varName] || "";
       });
 
-      // Only update if the variables actually changed
-      const hasChanged =
-        JSON.stringify(newVariables) !== JSON.stringify(variables);
-      if (hasChanged) {
-        setVariables(newVariables);
-      }
+      // Add permanent variables that aren't in text but have values
+      Object.entries(savedVariables).forEach(([key, value]) => {
+        if (value && !textVariables.includes(key)) {
+          mergedVariables[key] = value as string;
+        }
+      });
+
+      setVariables(mergedVariables);
     }
-  }, [selectedVariant, selectedTemplate?.id, selectedVariantData?.content]);
+  }, [
+    selectedVariant,
+    selectedVariantData?.content,
+    selectedTemplate?.variables,
+  ]);
 
-  // Update selected template when variables change (for unified data structure)
-  useEffect(() => {
-    if (selectedTemplate && variables && Object.keys(variables).length > 0) {
-      const updatedTemplate = {
-        ...selectedTemplate,
-        variables: variables,
-      };
+  // Handle variable changes and determine what to save
+  const handleVariableChange = useCallback(
+    (varName: string, value: string) => {
+      setVariables((prev: any) => ({
+        ...prev,
+        [varName]: value,
+      }));
 
-      // Only update if the template variables actually changed
-      const hasChanged =
-        JSON.stringify(selectedTemplate.variables) !==
-        JSON.stringify(variables);
-      if (hasChanged) {
-        setSelectedTemplate(updatedTemplate);
+      if (selectedTemplate) {
+        const textVariables = getCurrentVariables();
+        const savedVariables = selectedTemplate.variables || {};
 
-        // Update in templates array
+        // Determine what should be saved to Firestore
+        const variablesToSave: Record<string, string> = {};
+
+        // Only save variables that have values
+        Object.entries({ ...variables, [varName]: value }).forEach(
+          ([key, val]: any) => {
+            if (val) {
+              variablesToSave[key] = val;
+            }
+          }
+        );
+
+        // Remove variables that:
+        // 1. Have no value AND are not in text (temporary variables)
+        // 2. Had their value cleared
+        const filteredVariables = Object.fromEntries(
+          Object.entries(variablesToSave).filter(([key, val]) => {
+            return val || textVariables.includes(key);
+          })
+        );
+
+        // Update Firestore with permanent variables only
+        const permanentVariables = Object.fromEntries(
+          Object.entries(filteredVariables).filter(([key, val]) => val)
+        );
+
+        debouncedUpdateTemplateVariables(
+          selectedTemplate.id,
+          permanentVariables
+        );
+
+        // Update local template state
+        setSelectedTemplate((prev: any) => ({
+          ...prev,
+          variables: permanentVariables,
+        }));
+
+        // Update templates array
         setTemplates((prev: any) =>
-          prev.map((t: any) =>
-            t.id === selectedTemplate.id ? updatedTemplate : t
+          prev.map((template: any) =>
+            template.id === selectedTemplate.id
+              ? { ...template, variables: permanentVariables }
+              : template
           )
         );
       }
-    }
-  }, [variables, selectedTemplate?.id]);
+    },
+    [
+      selectedTemplate,
+      variables,
+      getCurrentVariables,
+      debouncedUpdateTemplateVariables,
+    ]
+  );
 
   const copyToClipboard = async (text: string, id: string) => {
     try {
@@ -133,7 +184,17 @@ const Templates: React.FC = () => {
       category,
       variables: {}, // Initialize with empty variables
     });
-    await createVariant(user?.id, newTemplate.id, "");
+
+    // Create the default variant
+    await createVariant(
+      user?.id,
+      newTemplate.id,
+      "",
+      null,
+      "Default",
+      true // Mark as default
+    );
+
     setTemplates([...templates, newTemplate]);
     setSelectedTemplate(newTemplate);
     setIsEditing(true);
@@ -151,10 +212,19 @@ const Templates: React.FC = () => {
   const addVariant = async () => {
     if (!selectedTemplate) return;
 
+    // Get the default variant's content
+    const defaultVariant: any = await getDefaultVariant(selectedTemplate.id);
+    const defaultContent = defaultVariant?.content || "";
+
+    const name = `Variant ${variants.length}`;
+
     const newVariant = await createVariant(
       user?.id,
       selectedTemplate.id,
-      selectedTemplate.content || ""
+      defaultContent, // Use default variant's content instead of selected variant
+      null,
+      name || "New Variant",
+      false // Not a default variant
     );
 
     setVariants([...variants, newVariant]);
@@ -162,20 +232,71 @@ const Templates: React.FC = () => {
     setIsEditing(true);
   };
 
+  const handleMakeVariantDefault = async (variantId: string) => {
+    if (!selectedTemplate) return;
+
+    try {
+      await makeVariantDefault(selectedTemplate.id, variantId);
+
+      // Update local state
+      setVariants((prev) =>
+        prev.map((variant) => ({
+          ...variant,
+          isDefault: variant.id === variantId,
+        }))
+      );
+
+      // Re-sort variants to ensure default is first
+      setVariants((prev) =>
+        [...prev].sort((a, b) => {
+          if (a.isDefault && !b.isDefault) return -1;
+          if (!a.isDefault && b.isDefault) return 1;
+          return 0;
+        })
+      );
+    } catch (error) {
+      console.error("Error making variant default:", error);
+    }
+  };
+
   const clearAllVariables = () => {
+    const textVariables = getCurrentVariables();
     const clearedVariables: Record<string, string> = {};
-    getCurrentVariables().forEach((varName: any) => {
+
+    // Keep text variables but clear their values
+    textVariables.forEach((varName: any) => {
       clearedVariables[varName] = "";
     });
+
     setVariables(clearedVariables);
+
+    // Update Firestore to remove all saved variables
+    if (selectedTemplate) {
+      debouncedUpdateTemplateVariables(selectedTemplate.id, {});
+
+      // Update local template state
+      setSelectedTemplate((prev: any) => ({
+        ...prev,
+        variables: {},
+      }));
+
+      // Update templates array
+      setTemplates((prev: any) =>
+        prev.map((template: any) =>
+          template.id === selectedTemplate.id
+            ? { ...template, variables: {} }
+            : template
+        )
+      );
+    }
   };
 
   const currentVariables = getCurrentVariables();
-  const hasVariables = currentVariables.length > 0;
+  const hasVariables = Object.keys(variables).length > 0;
 
   return (
     <div className="text-text min-h-screen font-sans">
-      <div className="flex h-screen">
+      <div className="flex gap-3 h-screen p-3">
         {/* Sidebar */}
         <Sidebar
           templates={templates}
@@ -190,47 +311,60 @@ const Templates: React.FC = () => {
         <div className="flex-1 flex flex-col">
           {selectedTemplate ? (
             <>
-              <TemplateHeader
-                variants={variants}
-                selectedTemplate={selectedTemplate}
-                currentVariables={currentVariables}
-                template={selectedTemplate}
-                hasVariables={hasVariables}
-                showVariableEditor={showVariableEditor}
-                setShowVariableEditor={setShowVariableEditor}
-                isEditing={isEditing}
-                setIsEditing={setIsEditing}
-                addVariant={addVariant}
-              />
+              <div className="flex flex-1">
+                <div className="flex flex-col flex-1 py-2 px-3 overflow-auto bg-bg-secondary rounded-2xl border border-border">
+                  <TemplateHeader
+                    variants={variants}
+                    selectedTemplate={selectedTemplate}
+                    currentVariables={currentVariables}
+                    template={selectedTemplate}
+                    hasVariables={hasVariables}
+                    showVariableEditor={showVariableEditor}
+                    setShowVariableEditor={setShowVariableEditor}
+                    isEditing={isEditing}
+                    setIsEditing={setIsEditing}
+                    addVariant={addVariant}
+                  />
+                  <VariantsTabs
+                    variants={variants}
+                    selectedVariant={selectedVariant}
+                    setSelectedVariant={setSelectedVariant}
+                    addVariant={addVariant}
+                    handleMakeVariantDefault={handleMakeVariantDefault}
+                  />
+                  <VariantContent
+                    selectedVariant={selectedVariant}
+                    setSelectedVariant={setSelectedVariant}
+                    isEditing={isEditing}
+                    variants={variants}
+                    setVariants={setVariants}
+                    variables={variables}
+                    replaceVariables={replaceVariables}
+                    copyToClipboard={copyToClipboard}
+                    copiedId={copiedId}
+                    selectedVariantData={selectedVariantData}
+                    selectedTemplate={selectedTemplate}
+                    currentVariables={currentVariables}
+                    hasVariables={hasVariables}
+                    showVariableEditor={showVariableEditor}
+                    setShowVariableEditor={setShowVariableEditor}
+                    setIsEditing={setIsEditing}
+                    addVariant={addVariant}
+                  />
+                </div>
 
-              {showVariableEditor && hasVariables && (
-                <VariableEditor
-                  currentVariables={currentVariables}
-                  variables={variables}
-                  setVariables={setVariables}
-                  clearAllVariables={clearAllVariables}
-                  selectedTemplate={selectedTemplate}
-                  isEditing={isEditing}
-                />
-              )}
-
-              <VariantsTabs
-                variants={variants}
-                selectedVariant={selectedVariant}
-                setSelectedVariant={setSelectedVariant}
-              />
-
-              <VariantContent
-                selectedVariant={selectedVariant}
-                isEditing={isEditing}
-                variants={variants}
-                setVariants={setVariants}
-                variables={variables}
-                replaceVariables={replaceVariables}
-                copyToClipboard={copyToClipboard}
-                copiedId={copiedId}
-                selectedVariantData={selectedVariantData}
-              />
+                {showVariableEditor && hasVariables && (
+                  <VariableEditor
+                    currentVariables={Object.keys(variables)}
+                    variables={variables}
+                    setVariables={setVariables}
+                    handleVariableChange={handleVariableChange}
+                    clearAllVariables={clearAllVariables}
+                    selectedTemplate={selectedTemplate}
+                    isEditing={isEditing}
+                  />
+                )}
+              </div>
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-text-muted">

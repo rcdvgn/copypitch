@@ -1,26 +1,58 @@
 @import "tailwindcss";
 
+/* Dark Theme */
 @theme {
-  --color-bg: rgb(10 10 10);
-  --color-bg-secondary: rgb(26 26 26);
-  --color-bg-tertiary: rgb(42 42 42);
-  --color-bg-hover: rgb(51 51 51);
-  --color-border: rgb(64 64 64);
-  --color-border-hover: rgb(85 85 85);
-  --color-text: rgb(255 255 255);
+  --color-bg: rgb(8 8 8);
+  --color-bg-secondary: rgb(20 20 20);
+  --color-bg-tertiary: rgb(32 32 32);
+  --color-bg-hover: rgb(44 44 44);
+
+  --color-border: rgb(255 255 255 / 0.08);
+  --color-border-hover: rgb(255 255 255 / 0.12);
+
+  --color-text: rgb(240 240 240);
   --color-text-secondary: rgb(176 176 176);
   --color-text-muted: rgb(136 136 136);
-  --color-primary: rgb(59 130 246);
-  --color-primary-hover: rgb(37 99 235);
+
+  --color-accent: rgb(79 70 229);
+  --color-accent-hover: rgb(67 56 202);
+  --color-primary: rgb(139 92 246);
+  --color-primary-hover: rgb(124 58 237);
+
   --color-success: rgb(16 185 129);
   --color-success-hover: rgb(5 150 105);
   --color-warning: rgb(245 158 11);
   --color-warning-hover: rgb(217 119 6);
   --color-danger: rgb(239 68 68);
   --color-danger-hover: rgb(220 38 38);
-  --color-accent: rgb(139 92 246);
-  --color-accent-hover: rgb(124 58 237);
 }
+
+/* Light Theme */
+/* @theme {
+  --color-bg: rgb(255 255 255);
+  --color-bg-secondary: rgb(249 250 251);
+  --color-bg-tertiary: rgb(243 244 246);
+  --color-bg-hover: rgb(229 231 235);
+
+  --color-border: rgb(0 0 0 / 0.08);
+  --color-border-hover: rgb(0 0 0 / 0.12);
+
+  --color-text: rgb(17 24 39);
+  --color-text-secondary: rgb(75 85 99);
+  --color-text-muted: rgb(107 114 128);
+
+  --color-accent: rgb(79 70 229);
+  --color-accent-hover: rgb(67 56 202);
+  --color-primary: rgb(139 92 246);
+  --color-primary-hover: rgb(124 58 237);
+
+  --color-success: rgb(16 185 129);
+  --color-success-hover: rgb(5 150 105);
+  --color-warning: rgb(245 158 11);
+  --color-warning-hover: rgb(217 119 6);
+  --color-danger: rgb(239 68 68);
+  --color-danger-hover: rgb(220 38 38);
+} */
 
 /* [data-theme="dark"] {
   
@@ -48,4 +80,12 @@ body {
 * {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
+}
+
+.input-1 {
+  @apply w-full px-3 py-2.5 bg-bg-secondary border border-border rounded-lg text-text text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors;
+}
+
+.icon-button-sm {
+  @apply w-7 h-7 rounded-lg flex items-center justify-center transition-colors text-text-secondary hover:bg-bg-hover hover:text-text;
 }

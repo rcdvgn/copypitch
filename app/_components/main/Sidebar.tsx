@@ -13,7 +13,7 @@ const Sidebar = ({
   const { addModal } = useModal();
 
   return (
-    <div className="w-[320px] bg-bg-secondary border-r border-border flex flex-col">
+    <div className="w-[260px] flex flex-col">
       <div className="p-6 border-b border-border">
         <h1 className="text-2xl font-bold text-primary mb-4">CopyPitch</h1>
         <button

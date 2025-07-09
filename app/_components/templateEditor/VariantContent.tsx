@@ -2,9 +2,12 @@
 import { useEffect, useCallback } from "react";
 import { Copy } from "lucide-react";
 import { useTemplateUpdates } from "@/app/_utils/templateEditorUtils";
+import VariantsTabs from "./VariantsTabs";
+import TemplateHeader from "./TemplateHeader";
 
 const VariantContent = ({
   selectedVariant,
+  setSelectedVariant,
   isEditing,
   variants,
   setVariants,
@@ -13,6 +16,14 @@ const VariantContent = ({
   copyToClipboard,
   copiedId,
   selectedVariantData,
+
+  selectedTemplate,
+  currentVariables,
+  hasVariables,
+  showVariableEditor,
+  setShowVariableEditor,
+  setIsEditing,
+  addVariant,
 }: any) => {
   const { debouncedUpdateVariant } = useTemplateUpdates();
 
@@ -59,47 +70,21 @@ const VariantContent = ({
   }, [debouncedUpdateVariant]);
 
   return (
-    <div className="flex-1 px-8 py-8 overflow-auto">
+    <div className="bg-bg-tertiary w-full flex-1 max-w-[1000px]">
       {selectedVariantData && (
         <div>
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="m-0 text-lg font-medium">
-              {selectedVariantData.name}
-            </h3>
-            <button
-              onClick={() =>
-                copyToClipboard(
-                  selectedVariantData.content,
-                  selectedVariantData.id
-                )
-              }
-              className={`px-4 py-2 rounded-md text-sm flex items-center gap-1 ${
-                copiedId === selectedVariantData.id
-                  ? "bg-success text-white"
-                  : "bg-primary text-white"
-              }`}
-            >
-              <Copy size={14} />
-              {copiedId === selectedVariantData.id ? "Copied!" : "Copy"}
-            </button>
-          </div>
-          <div>
-            <h4 className="mb-2 text-sm font-medium text-text-secondary">
-              {isEditing ? "Template Editor" : "Preview"}
-            </h4>
-            <textarea
-              value={
-                isEditing
-                  ? selectedVariantData.content || ""
-                  : replaceVariables(selectedVariantData.content, variables)
-              }
-              onChange={handleContentChange}
-              readOnly={!isEditing}
-              className={`w-full h-[300px] p-4 border border-border rounded-lg text-base leading-relaxed resize-vertical font-sans ${
-                isEditing ? "bg-bg-secondary" : "bg-bg-tertiary"
-              } text-text`}
-            />
-          </div>
+          <textarea
+            value={
+              isEditing
+                ? selectedVariantData.content || ""
+                : replaceVariables(selectedVariantData.content, variables)
+            }
+            onChange={handleContentChange}
+            readOnly={!isEditing}
+            className={`w-full h-full p-4 border-none outline-none rounded-lg text-base leading-relaxed resize-vertical font-sans ${
+              isEditing ? "" : ""
+            } text-text`}
+          />
         </div>
       )}
     </div>

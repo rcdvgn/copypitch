@@ -74,5 +74,29 @@ export function useTemplateUpdates() {
     []
   );
 
-  return { debouncedUpdateVariant, debouncedUpdateTemplate };
+  // Updated function to update template variables
+  const debouncedUpdateTemplateVariables = useCallback(
+    _.debounce(
+      async (templateId: string, variables: Record<string, string>) => {
+        try {
+          const templateRef = doc(db, "templates", templateId);
+          await updateDoc(templateRef, {
+            variables: variables,
+            updatedAt: new Date(),
+          });
+          console.log("Template variables updated successfully");
+        } catch (error) {
+          console.error("Error updating template variables:", error);
+        }
+      },
+      500
+    ),
+    []
+  );
+
+  return {
+    debouncedUpdateVariant,
+    debouncedUpdateTemplate,
+    debouncedUpdateTemplateVariables,
+  };
 }
