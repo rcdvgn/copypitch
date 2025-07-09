@@ -1,33 +1,47 @@
 // _components/main/Sidebar.tsx
-import { Plus } from "lucide-react";
+import { Plus, Search, SquarePen } from "lucide-react";
 import TemplateList from "../templateEditor/TemplateList";
 import { useModal } from "@/app/_contexts/ModalContext";
 import { useTemplateContext } from "@/app/_contexts/TemplateContext";
+import { NewTemplateIcon } from "../assets/icons";
 
 const Sidebar = () => {
-  const {
-    templates,
-    currentTemplate,
-    createNewTemplate,
-    deleteTemplate,
-    selectTemplate,
-  } = useTemplateContext();
+  const { createNewTemplate, isFullView } = useTemplateContext();
   const { addModal } = useModal();
 
   return (
-    <div className="w-[260px] flex flex-col">
-      <div className="p-6 border-b border-border">
-        <h1 className="text-2xl font-bold text-primary mb-4">CopyPitch</h1>
-        <button
-          onClick={() =>
-            addModal("createTemplate", { onCreateTemplate: createNewTemplate })
-          }
-          className="w-full py-2.5 px-4 bg-primary text-white rounded-md font-medium flex items-center justify-center gap-2 text-sm"
+    <div
+      className={`flex flex-col gap-3 overflow-hidden transition-all duration-200 ease-in-out ${
+        isFullView ? "w-10" : "w-[250px]"
+      }`}
+    >
+      {isFullView ? (
+        <div
+          // onClick={() =>
+          // }
+          className="sidebar-item-square border-transparent hover:bg-bg-hover"
         >
-          <Plus size={16} />
-          New Template
+          <Search size={16} />
+        </div>
+      ) : (
+        <button className="button-1 !text-text-muted !justify-start !text-sm !bg-bg-secondary hover:!bg-bg-tertiary">
+          <Search size={16} />
+          Search
         </button>
+      )}
+
+      <div
+        onClick={() =>
+          addModal("createTemplate", { onCreateTemplate: createNewTemplate })
+        }
+        className={`${
+          isFullView ? "sidebar-item-square" : "sidebar-item"
+        } border-transparent hover:bg-bg-hover`}
+      >
+        <NewTemplateIcon className={isFullView ? "h-4" : "h-[15px]"} />
+        {!isFullView && "New Template"}
       </div>
+
       <TemplateList />
     </div>
   );

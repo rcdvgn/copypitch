@@ -1,5 +1,11 @@
 // lib/stripe-utils.ts
-import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import Stripe from "stripe";
 import { db } from "../_config/firebase/client";
 import {
@@ -45,7 +51,7 @@ export async function getOrCreateStripeCustomer(
     // Update user document with Stripe customer ID
     await updateDoc(doc(db, "users", userId), {
       stripeCustomerId: customer.id,
-      updatedAt: new Date(),
+      updatedAt: serverTimestamp(),
     });
 
     return customer.id;
@@ -67,7 +73,7 @@ export async function updateUserSubscription(
       subscriptionId: subscription.id,
       subscriptionStatus: subscription.status,
       plan,
-      updatedAt: new Date(),
+      updatedAt: serverTimestamp(),
     });
   } catch (error) {
     console.error("Error updating user subscription:", error);

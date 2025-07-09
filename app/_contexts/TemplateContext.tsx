@@ -58,6 +58,7 @@ interface TemplateContextType {
 
   // UI state
   isEditing: boolean;
+  isFullView: boolean;
   showVariableEditor: boolean;
 
   // Template actions
@@ -77,6 +78,7 @@ interface TemplateContextType {
 
   // UI actions
   setIsEditing: (editing: boolean) => void;
+  setIsFullView: (isFullView: boolean) => void;
   setShowVariableEditor: (show: boolean) => void;
 
   // Computed properties
@@ -129,6 +131,7 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // UI state
   const [isEditing, setIsEditing] = useState(false);
+  const [isFullView, setIsFullView] = useState(false);
   const [showVariableEditor, setShowVariableEditor] = useState(false);
 
   // Computed properties
@@ -467,6 +470,7 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // UI state
     isEditing,
+    isFullView,
     showVariableEditor,
 
     // Template actions
@@ -486,6 +490,7 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // UI actions
     setIsEditing,
+    setIsFullView,
     setShowVariableEditor,
 
     // Computed properties

@@ -5,7 +5,7 @@ import {
   updateUserSubscription,
   getUserByStripeCustomerId,
 } from "@/app/_utils/stripeUtils";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import Stripe from "stripe";
 import { db } from "@/app/_config/firebase/client";
 
@@ -107,8 +107,8 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
 
     // Update user's last payment date
     await updateDoc(doc(db, "users", user.id), {
-      lastPaymentDate: new Date(),
-      updatedAt: new Date(),
+      lastPaymentDate: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
 
     console.log(`Payment succeeded for user ${user.id}`);

@@ -18,22 +18,20 @@ const VariantContent = () => {
   };
 
   return (
-    <div className="bg-bg-tertiary w-full flex-1 max-w-[1000px]">
+    <div className="w-full flex-1 text-center">
       {currentVariant && (
-        <div>
-          <textarea
-            value={
-              isEditing
-                ? currentVariant.content || ""
-                : replaceVariables(currentVariant.content, variables)
-            }
-            onChange={handleContentChange}
-            readOnly={!isEditing}
-            className={`w-full h-full p-4 border-none outline-none rounded-lg text-base leading-relaxed resize-vertical font-sans ${
-              isEditing ? "" : ""
-            } text-text`}
-          />
-        </div>
+        <textarea
+          value={
+            isEditing
+              ? currentVariant.content || ""
+              : replaceVariables(currentVariant.content, variables)
+          }
+          onChange={handleContentChange}
+          readOnly={!isEditing}
+          className={`max-w-[1000px] w-full h-full p-4 border-none outline-none rounded-lg text-base leading-relaxed resize-none font-sans ${
+            isEditing ? "" : ""
+          } text-text`}
+        />
       )}
     </div>
   );

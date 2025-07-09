@@ -11,6 +11,7 @@ import {
   updateDoc,
   arrayUnion,
   writeBatch,
+  serverTimestamp,
 } from "firebase/firestore";
 
 const newTemplate = () => ({
@@ -18,13 +19,13 @@ const newTemplate = () => ({
   description: "",
   variables: {},
   variantIds: [],
-  createdAt: new Date(),
-  updatedAt: new Date(),
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp(),
 });
 
 const newVariant = () => ({
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp(),
   isDefault: false,
 });
 
@@ -75,7 +76,7 @@ export const createVariant = async (
     // Add the variation ID to the template's variationIds array
     await updateDoc(doc(db, "templates", templateId), {
       variantIds: arrayUnion(docRef.id),
-      updatedAt: new Date().toISOString(),
+      updatedAt: serverTimestamp(),
     });
 
     return {
@@ -93,7 +94,7 @@ export const fetchUserTemplates = async (userId: string) => {
     const q = query(
       collection(db, "templates"),
       where("userId", "==", userId),
-      orderBy("createdAt", "desc")
+      orderBy("updatedAt", "desc")
     );
 
     const snapshot = await getDocs(q);
@@ -166,7 +167,7 @@ export const makeVariantDefault = async (
 
     // Update template's updatedAt timestamp
     const templateRef = doc(db, "templates", templateId);
-    batch.update(templateRef, { updatedAt: new Date().toISOString() });
+    batch.update(templateRef, { updatedAt: serverTimestamp() });
 
     await batch.commit();
     console.log("Default variant updated successfully");

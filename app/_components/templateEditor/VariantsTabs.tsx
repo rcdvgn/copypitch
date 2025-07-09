@@ -39,7 +39,7 @@ const VariantsTabs = () => {
 
   return (
     <div className="mb-3">
-      <div className="flex w-full">
+      <div className="flex items-center w-full">
         {variants &&
           variants.map((variant: any, index: any) => {
             const nextIsSelected =

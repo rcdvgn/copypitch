@@ -83,9 +83,21 @@ body {
 }
 
 .input-1 {
-  @apply w-full px-3 py-2.5 bg-bg-secondary border border-border rounded-lg text-text text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors;
+  @apply w-full px-3 h-10 bg-bg-secondary border border-border rounded-xl text-text text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent placeholder:text-text-muted transition-colors;
+}
+
+.button-1 {
+  @apply w-full h-10 px-4 bg-bg-tertiary border border-border hover:bg-bg-hover hover:border-border-hover text-white rounded-xl font-medium flex items-center justify-center gap-2 text-[13px] cursor-pointer;
+}
+
+.sidebar-item {
+  @apply w-full flex gap-2 items-center rounded-xl pl-3 h-9 border cursor-pointer text-text-secondary hover:text-text text-[13px] font-medium transition-colors;
+}
+
+.sidebar-item-square {
+  @apply w-full aspect-square flex items-center justify-center rounded-xl border cursor-pointer text-text-secondary hover:text-text font-medium transition-colors;
 }
 
 .icon-button-sm {
-  @apply w-7 h-7 rounded-lg flex items-center justify-center transition-colors text-text-secondary hover:bg-bg-hover hover:text-text;
+  @apply w-7 h-7 rounded-lg flex items-center justify-center transition-colors text-text-secondary hover:bg-bg-hover hover:text-text cursor-pointer;
 }

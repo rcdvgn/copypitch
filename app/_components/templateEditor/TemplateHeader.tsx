@@ -1,5 +1,13 @@
 // _components/templateEditor/TemplateHeader.tsx
-import { Variable, Edit2, Eye, Plus, Copy } from "lucide-react";
+import {
+  Variable,
+  Edit2,
+  Eye,
+  Plus,
+  Copy,
+  ArrowLeftToLine,
+  ArrowRightFromLine,
+} from "lucide-react";
 import { useTemplateContext } from "@/app/_contexts/TemplateContext";
 
 const TemplateHeader = () => {
@@ -10,6 +18,8 @@ const TemplateHeader = () => {
     setShowVariableEditor,
     isEditing,
     setIsEditing,
+    isFullView,
+    setIsFullView,
   } = useTemplateContext();
 
   if (!currentTemplate) return null;
@@ -17,12 +27,27 @@ const TemplateHeader = () => {
   return (
     <div className="px-1">
       <div className="flex items-center justify-between w-full mb-2">
-        <div className="text-base font-medium">
-          <span className="text-text-secondary">
-            {currentTemplate.category}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => {
+              setIsFullView(!isFullView);
+            }}
+            className="icon-button-sm"
+          >
+            {isFullView ? (
+              <ArrowRightFromLine size={16} />
+            ) : (
+              <ArrowLeftToLine size={16} />
+            )}
+          </button>
+
+          <span className="text-sm font-medium">
+            <span className="text-text-secondary">
+              {currentTemplate.category}
+            </span>
+            <span className="text-text-muted"> / </span>
+            <span className="text-text">{currentTemplate.name}</span>
           </span>
-          <span className="text-text-muted"> / </span>
-          <span className="text-text">{currentTemplate.title}</span>
         </div>
 
         <div className="flex gap-1">
