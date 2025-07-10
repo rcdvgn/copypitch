@@ -19,6 +19,8 @@ import {
 } from "@/app/_lib/db/templates";
 import { useTemplateUpdates } from "@/app/_utils/templateEditorUtils";
 import { useUsageErrors } from "../_hooks/useUsageErrors";
+import { toast } from "sonner";
+import { notify } from "../_lib/notifications";
 
 interface Template {
   id: string;
@@ -63,7 +65,7 @@ interface TemplateContextType {
   showVariableEditor: boolean;
 
   // Template actions
-  createNewTemplate: (name: string, category?: string) => Promise<void>;
+  createNewTemplate: (name: string, category?: string) => any;
   deleteTemplate: (templateId: string) => Promise<void>;
   selectTemplate: (templateId: string) => void;
 
@@ -263,7 +265,7 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
     name: string,
     category: string = "General"
   ) => {
-    if (!user?.id) return;
+    if (!user?.id) return false;
 
     try {
       const newTemplate = await createTemplate({
@@ -281,16 +283,26 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
       // Navigate to the new template
       router.push(`/t/${newTemplate.id}`);
       setIsEditing(true);
+
+      return true; // Success
     } catch (error) {
       const errorInfo = handleUsageError(error);
 
       if (errorInfo.isUsageError) {
         // Show upgrade prompt or usage limit modal
-        console.log("Usage Error:", errorInfo.message);
+        notify({
+          type: "error",
+          message: errorInfo.message,
+        });
       } else {
         // Handle other errors
-        console.log("General Error:", errorInfo.message);
+        notify({
+          type: "error",
+          message: errorInfo.message,
+        });
       }
+
+      return false; // Failed
     }
   };
 

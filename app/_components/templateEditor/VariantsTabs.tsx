@@ -57,7 +57,7 @@ const VariantsTabs = () => {
                 <button
                   onClick={() => selectVariant(variant.id)}
                   onContextMenu={(e) => handleContextMenu(e, variant.id)}
-                  className={`text-left grow px-3 h-8 rounded-xl text-sm font-medium cursor-pointer truncate transition-all duration-100 ease-in-out flex items-center gap-1 ${
+                  className={`text-left grow px-3 h-8 rounded-xl text-[13px] font-medium cursor-pointer truncate transition-all duration-100 ease-in-out flex items-center gap-1 ${
                     currentVariant?.id === variant?.id
                       ? "bg-bg-tertiary text-text"
                       : "text-text-secondary hover:bg-bg-hover"
