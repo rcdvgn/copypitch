@@ -54,7 +54,6 @@ export default function CreateTemplate({ data, closeItself }: any) {
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      console.log("dsgdfgdfg");
       handleCreate();
     } else if (e.key === "Escape") {
       closeItself();

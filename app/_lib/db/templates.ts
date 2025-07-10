@@ -1,4 +1,5 @@
 import { db } from "@/app/_config/firebase/client";
+import { checkUsageLimits } from "@/app/_utils/usageLimits";
 import {
   collection,
   getDocs,
@@ -12,10 +13,10 @@ import {
   arrayUnion,
   writeBatch,
   serverTimestamp,
+  Timestamp,
 } from "firebase/firestore";
 
 const newTemplate = () => ({
-  title: "New Template",
   description: "",
   variables: {},
   variantIds: [],
@@ -29,21 +30,39 @@ const newVariant = () => ({
   isDefault: false,
 });
 
+// Updated createTemplate function
 export const createTemplate = async ({
   userId,
   name,
   category,
   setData = null,
 }: any = {}) => {
+  // Check limits first
+  const limitCheck: any = await checkUsageLimits(userId, "CREATE_TEMPLATE");
+
+  if (!limitCheck.canPerform) {
+    throw new Error(
+      JSON.stringify({
+        type: "USAGE_LIMIT_ERROR",
+        code: limitCheck.error,
+        current: limitCheck.current,
+        limit: limitCheck.limit,
+      })
+    );
+  }
+
   const templateData = setData || newTemplate();
+
   try {
     const fullTemplate = { ...templateData, userId, name, category };
-
     const docRef = await addDoc(collection(db, "templates"), fullTemplate);
 
+    // Return with client-side timestamps for immediate local state use
     return {
       id: docRef.id,
       ...fullTemplate,
+      createdAt: Timestamp.now(), // Use client timestamp for local state
+      updatedAt: Timestamp.now(), // Use client timestamp for local state
     };
   } catch (error) {
     console.error("Error creating template:", error);
@@ -51,6 +70,7 @@ export const createTemplate = async ({
   }
 };
 
+// Updated createVariant function
 export const createVariant = async (
   userId: any,
   templateId: any,
@@ -59,9 +79,27 @@ export const createVariant = async (
   name: any = "New Variant",
   isDefault: boolean = false
 ) => {
+  // Check limits first
+  const limitCheck: any = await checkUsageLimits(
+    userId,
+    "CREATE_VARIANT",
+    templateId
+  );
+
+  if (!limitCheck.canPerform) {
+    throw new Error(
+      JSON.stringify({
+        type: "USAGE_LIMIT_ERROR",
+        code: limitCheck.error,
+        current: limitCheck.current,
+        limit: limitCheck.limit,
+      })
+    );
+  }
+
   const variantData = setData || newVariant();
+
   try {
-    // Create the variation document
     const fullVariant = {
       ...variantData,
       userId,
@@ -73,15 +111,17 @@ export const createVariant = async (
 
     const docRef = await addDoc(collection(db, "variants"), fullVariant);
 
-    // Add the variation ID to the template's variationIds array
     await updateDoc(doc(db, "templates", templateId), {
       variantIds: arrayUnion(docRef.id),
       updatedAt: serverTimestamp(),
     });
 
+    // Return with client-side timestamps for immediate local state use
     return {
       id: docRef.id,
       ...fullVariant,
+      createdAt: Timestamp.now(), // Use client timestamp for local state
+      updatedAt: Timestamp.now(), // Use client timestamp for local state
     };
   } catch (error) {
     console.error("Error creating variation:", error);

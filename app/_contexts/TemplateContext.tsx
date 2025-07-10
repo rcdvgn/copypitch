@@ -18,6 +18,7 @@ import {
   makeVariantDefault,
 } from "@/app/_lib/db/templates";
 import { useTemplateUpdates } from "@/app/_utils/templateEditorUtils";
+import { useUsageErrors } from "../_hooks/useUsageErrors";
 
 interface Template {
   id: string;
@@ -106,6 +107,7 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
   const { user } = useAuth();
   const router = useRouter();
   const params = useParams();
+  const { handleUsageError } = useUsageErrors();
   const { debouncedUpdateTemplateVariables, debouncedUpdateVariant } =
     useTemplateUpdates();
 
@@ -280,7 +282,15 @@ export const TemplateProvider: React.FC<{ children: React.ReactNode }> = ({
       router.push(`/t/${newTemplate.id}`);
       setIsEditing(true);
     } catch (error) {
-      console.error("Error creating template:", error);
+      const errorInfo = handleUsageError(error);
+
+      if (errorInfo.isUsageError) {
+        // Show upgrade prompt or usage limit modal
+        console.log("Usage Error:", errorInfo.message);
+      } else {
+        // Handle other errors
+        console.log("General Error:", errorInfo.message);
+      }
     }
   };
 
